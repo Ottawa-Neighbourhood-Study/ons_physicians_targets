@@ -270,5 +270,22 @@ list(
       pivot_wider(id_cols = "polygon_attribute", names_from = ONS_ID, values_from = "value") %>%
       write_csv("outputs/new_data_ons_format.csv")
   ),
+  
+  
+  ## Ottawa docs KML file for the web site
+  #group by lat & lon, combine all names for those
+  # with same lat/lon, remove duplicate rows
+  tar_target(
+    ottawa_docs_kml,
+    
+    ottawa_docs %>%
+      select(doc_name, lat, lon) %>%
+      group_by(lat, lon) %>%
+      mutate(count = n()) %>%
+      mutate(physician_names = stringr::str_flatten(doc_name, collapse = "\n")) %>%
+      select(lat, lon, physician_names) %>%
+      sf::write_sf("outputs/physician_locations_for_google_maps.kml")
+  ),
+  
   NULL
 )
